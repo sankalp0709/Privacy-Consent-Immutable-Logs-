@@ -1,0 +1,555 @@
+{
+  "info": {
+    "name": "BHIV Agent System API",
+    "description": "Complete API collection for BHIV Core Agent System including Agent Orchestrator",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-API-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "uniguru-dev-key-2025",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url_simple_api",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "base_url_mcp_bridge",
+      "value": "http://localhost:8002",
+      "type": "string"
+    },
+    {
+      "key": "base_url_orchestrator",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "base_url_web",
+      "value": "http://localhost:8003",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🤖 Agent Orchestrator API (Port 8080)",
+      "item": [
+        {
+          "name": "🎯 Intelligent Query Processing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Summarize the key concepts of machine learning\",\n  \"user_id\": \"user123\",\n  \"session_id\": \"session456\",\n  \"input_type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/ask",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "ask"
+              ]
+            },
+            "description": "Intelligent query processing with automatic agent routing based on intent classification"
+          }
+        },
+        {
+          "name": "🚨 System Alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_orchestrator}}/alerts?limit=5&flagged_only=true",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "flagged_only",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Get system alerts and flagged activities for monitoring"
+          }
+        },
+        {
+          "name": "📋 Get User Consent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_orchestrator}}/consent?user_id=user123",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "consent"
+              ],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "user123"
+                }
+              ]
+            },
+            "description": "Check user consent status for privacy and data processing"
+          }
+        },
+        {
+          "name": "📝 Update User Consent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"user123\",\n  \"consent_type\": \"privacy_policy\",\n  \"granted\": true,\n  \"consent_details\": \"User agreed to privacy policy v1.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/consent",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "consent"
+              ]
+            },
+            "description": "Update user consent settings for privacy and data processing"
+          }
+        },
+        {
+          "name": "🔍 Agent Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_orchestrator}}/agents/status",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "agents",
+                "status"
+              ]
+            },
+            "description": "Get health and status information for all agents"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🌐 Simple API (Port 8001)",
+      "item": [
+        {
+          "name": "🕉️ Vedas Agent Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"What is dharma in Hindu philosophy?\",\n  \"language\": \"hi\",\n  \"voice_enabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url_simple_api}}/ask-vedas",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "ask-vedas"
+              ]
+            },
+            "description": "Query the Vedas agent for spiritual guidance"
+          }
+        },
+        {
+          "name": "🎓 EduMentor Agent Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Explain machine learning basics\",\n  \"platform\": \"twitter\",\n  \"language\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_simple_api}}/edumentor",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "edumentor"
+              ]
+            },
+            "description": "Query the EduMentor agent for educational content"
+          }
+        },
+        {
+          "name": "🌿 Wellness Agent Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"How to reduce stress through meditation?\",\n  \"voice_enabled\": true,\n  \"tone\": \"calm\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_simple_api}}/wellness",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "wellness"
+              ]
+            },
+            "description": "Query the Wellness agent for health and wellness guidance"
+          }
+        },
+        {
+          "name": "📚 Knowledge Base Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"What are the principles of reinforcement learning?\",\n  \"max_results\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url_simple_api}}/query-kb",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "query-kb"
+              ]
+            },
+            "description": "Query the knowledge base with RAG API and Groq enhancement"
+          }
+        },
+        {
+          "name": "🏥 Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_simple_api}}/health",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check system health and component status"
+          }
+        },
+        {
+          "name": "📊 System Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_simple_api}}/stats",
+              "host": [
+                "{{base_url_simple_api}}"
+              ],
+              "path": [
+                "stats"
+              ]
+            },
+            "description": "Get system statistics and performance metrics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔄 MCP Bridge API (Port 8002)",
+      "item": [
+        {
+          "name": "🎯 Handle Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent\": \"edumentor_agent\",\n  \"input\": \"Explain quantum computing\",\n  \"input_type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_mcp_bridge}}/handle_task",
+              "host": [
+                "{{base_url_mcp_bridge}}"
+              ],
+              "path": [
+                "handle_task"
+              ]
+            },
+            "description": "Handle a single task through the MCP Bridge"
+          }
+        },
+        {
+          "name": "📋 Multi-Task Processing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"files\": [\n    {\n      \"path\": \"document.pdf\",\n      \"type\": \"pdf\",\n      \"data\": \"Analyze this document\"\n    }\n  ],\n  \"agent\": \"knowledge_agent\",\n  \"task_type\": \"analyze\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_mcp_bridge}}/handle_multi_task",
+              "host": [
+                "{{base_url_mcp_bridge}}"
+              ],
+              "path": [
+                "handle_multi_task"
+              ]
+            },
+            "description": "Handle multiple tasks through the MCP Bridge"
+          }
+        },
+        {
+          "name": "🏥 Bridge Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_mcp_bridge}}/health",
+              "host": [
+                "{{base_url_mcp_bridge}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check MCP Bridge health status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🌐 Web Interface (Port 8003)",
+      "item": [
+        {
+          "name": "📊 Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46c2VjcmV0",
+                "description": "Base64 encoded admin:secret"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_web}}/dashboard",
+              "host": [
+                "{{base_url_web}}"
+              ],
+              "path": [
+                "dashboard"
+              ]
+            },
+            "description": "Access the web dashboard (requires authentication)"
+          }
+        },
+        {
+          "name": "📤 Download NLO",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Basic YWRtaW46c2VjcmV0",
+                "description": "Base64 encoded admin:secret"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url_web}}/download_nlo/task_123?format=json",
+              "host": [
+                "{{base_url_web}}"
+              ],
+              "path": [
+                "download_nlo",
+                "task_123"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            },
+            "description": "Download NLO results (requires authentication)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Test Scenarios",
+      "item": [
+        {
+          "name": "📝 Summarization Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Summarize the main concepts of artificial intelligence\",\n  \"user_id\": \"test_user\",\n  \"session_id\": \"test_session\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/ask",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "ask"
+              ]
+            },
+            "description": "Test summarization intent routing to SummarizerAgent"
+          }
+        },
+        {
+          "name": "📋 Planning Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Create a project plan for developing a mobile app\",\n  \"user_id\": \"test_user\",\n  \"session_id\": \"test_session\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/ask",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "ask"
+              ]
+            },
+            "description": "Test planning intent routing to PlannerAgent"
+          }
+        },
+        {
+          "name": "🔍 File Search Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Find documents about machine learning algorithms\",\n  \"user_id\": \"test_user\",\n  \"session_id\": \"test_session\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/ask",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "ask"
+              ]
+            },
+            "description": "Test file search intent routing to FileSearchAgent"
+          }
+        },
+        {
+          "name": "❓ Q&A Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"What is the difference between supervised and unsupervised learning?\",\n  \"user_id\": \"test_user\",\n  \"session_id\": \"test_session\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_orchestrator}}/ask",
+              "host": [
+                "{{base_url_orchestrator}}"
+              ],
+              "path": [
+                "ask"
+              ]
+            },
+            "description": "Test Q&A intent routing to QnAAgent"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "bhiv_nas_deployment": {
+    "version": "1.0",
+    "deployment_date": "2025-08-05 17:50:35",
+    "qdrant": {},
+    "nas": {
+      "nas_name": "192.168.0.94",
+      "share_name": "Guruukul_DB",
+      "username": "",
+      "password": "",
+      "domain": "WORKGROUP",
+      "timeout": 30,
+      "retry_attempts": 3,
+      "port": 445,
+      "unc_path": "\\\\192.168.0.94\\Guruukul_DB",
+      "mapped_drive": "G:",
+      "mount_command": "net use G: \\\\192.168.0.94\\Guruukul_DB /persistent:yes",
+      "embeddings_path": "G:\\qdrant_embeddings",
+      "documents_path": "G:\\source_documents",
+      "metadata_path": "G:\\metadata",
+      "qdrant_data_path": "G:\\qdrant_data"
+    },
+    "domains": [
+      "vedas",
+      "education",
+      "wellness"
+    ],
+    "status": "deployed"
+  }
+}

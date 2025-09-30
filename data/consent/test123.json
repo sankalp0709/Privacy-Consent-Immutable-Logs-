@@ -1,0 +1,11 @@
+{
+  "employee_id": "test123",
+  "monitoring_enabled": true,
+  "retention_days": 90,
+  "expiration_date": "2025-12-29T10:56:40.774895",
+  "data_categories": [
+    "all"
+  ],
+  "last_updated": "2025-09-30T10:56:40.774895",
+  "last_updated_by": "system"
+}

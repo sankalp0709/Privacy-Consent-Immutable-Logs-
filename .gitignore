@@ -1,0 +1,77 @@
+# Virtual environments
+/venv/
+venv/
+/.env
+/.env.*
+/.env.uniguru
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment files with secrets
+.env.local
+.env.production
+.env.staging
+*.env.local
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+vijay
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Logs and databases
+logs/
+*.log
+*.sqlite
+*.db
+knowledge_cache/
+knowledge_cache.json
+
+# Qdrant data
+qdrant_data/
+qdrant_storage/
+*.qdrant
+*.mmap
+*.dat
+open-*
+
+# Large binary files
+*.bin
+*.h5
+*.pkl
+*.model
+*.pt
+*.pth
+*.weights
+
+# Local storage
+local_setup/
+cache/
+temp/
+
+# NAS cache
+cache/nas_cache/
+
+# Vector embeddings
+*.vec
+*.embedding
+*.embeddings
+vector_store/
+embeddings/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Added by Gemini
+*.sqlite3
+lock (1)

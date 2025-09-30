@@ -1,0 +1,16 @@
+{
+  "bhiv_local_setup": {
+    "version": "1.0",
+    "setup_type": "local",
+    "qdrant_mode": "in_memory",
+    "storage_path": "local_setup\\storage",
+    "cache_path": "local_setup\\cache",
+    "domains": [
+      "vedas",
+      "education",
+      "wellness"
+    ],
+    "sample_data": true,
+    "status": "ready"
+  }
+}

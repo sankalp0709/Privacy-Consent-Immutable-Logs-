@@ -1,0 +1,15 @@
+Ayurveda is the traditional system of medicine from India, dating back over 5000 years.
+        It focuses on maintaining health through balance of mind, body, and spirit.
+        
+        Key principles of Ayurveda:
+        - Three doshas: Vata (air/space), Pitta (fire/water), Kapha (earth/water)
+        - Prevention is better than cure
+        - Treatment of root causes, not just symptoms
+        - Individualized medicine based on constitution
+        
+        Ayurvedic treatments include:
+        - Herbal medicines
+        - Dietary recommendations
+        - Lifestyle modifications
+        - Yoga and meditation
+        - Panchakarma (detoxification)
