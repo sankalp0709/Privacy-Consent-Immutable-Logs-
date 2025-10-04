@@ -5,6 +5,7 @@ Integrates with RAG API for knowledge retrieval and Groq for AI-powered answers
 """
 
 import os
+import asyncio
 import uuid
 import json
 import logging
@@ -21,6 +22,8 @@ from pydantic import BaseModel
 from utils.logger import get_logger
 from utils.rag_client import rag_client
 from compliance.api import router as compliance_router  # Import compliance router
+from compliance.consent_manager import consent_manager
+from compliance.audit_logger import audit_logger
 
 logger = get_logger(__name__)
 
@@ -403,3 +406,36 @@ if __name__ == "__main__":
     print("   GET/POST /compliance/* - Privacy & audit controls")
     print("="*60)
     uvicorn.run(app, host=args.host, port=args.port)
+# ==================== STARTUP TASKS ====================
+
+@app.on_event("startup")
+async def start_retention_worker():
+    async def retention_worker():
+        retention_days = int(os.getenv("AUDIT_LOG_RETENTION_DAYS", "90"))
+        while True:
+            try:
+                # Apply consent retention
+                consent_deleted = consent_manager.apply_retention_policy()
+                # Apply audit log retention
+                result = audit_logger.apply_retention_policy(retention_days=retention_days)
+                logs_deleted = result.get("logs_deleted", 0)
+                # Log a summary event
+                audit_logger.log_access(
+                    actor="system",
+                    action="daily_retention",
+                    resource="system",
+                    reason="scheduled",
+                    purpose="retention_enforcement",
+                    via_endpoint="startup_worker",
+                    extra={
+                        "consent_records_deleted": consent_deleted,
+                        "log_files_deleted": logs_deleted,
+                        "retention_days": retention_days
+                    }
+                )
+            except Exception as e:
+                logger.error(f"Retention worker error: {e}")
+            # Sleep ~24 hours
+            await asyncio.sleep(24 * 60 * 60)
+
+    asyncio.create_task(retention_worker())

@@ -6,6 +6,7 @@ import os
 import json
 import time
 import uuid
+import hashlib
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from pathlib import Path
@@ -36,13 +37,46 @@ class ImmutableAuditLogger:
         """Generate a log filename based on the current date"""
         today = datetime.now().strftime("%Y-%m-%d")
         return self.log_dir / f"audit_log_{today}.jsonl"
+
+    def _generate_log_filename(self, date: datetime) -> str:
+        """Compatibility helper: return the log file name for a given date."""
+        return f"audit_log_{date.strftime('%Y-%m-%d')}.jsonl"
     
+    def _compute_hash(self, prev_hash: Optional[str], entry: Dict[str, Any]) -> str:
+        """Compute SHA-256 hash chaining the previous hash and current entry"""
+        hasher = hashlib.sha256()
+        if prev_hash:
+            hasher.update(prev_hash.encode("utf-8"))
+        hasher.update(json.dumps(entry, sort_keys=True).encode("utf-8"))
+        return hasher.hexdigest()
+
+    def _get_last_hash(self) -> Optional[str]:
+        """Return the last hash from the current log file if present"""
+        log_file = self._get_log_filename()
+        if not log_file.exists():
+            return None
+        try:
+            with open(log_file, "r") as f:
+                last_line = None
+                for line in f:
+                    if line.strip():
+                        last_line = line.strip()
+                if last_line:
+                    try:
+                        obj = json.loads(last_line)
+                        return obj.get("hash")
+                    except json.JSONDecodeError:
+                        return None
+        except Exception:
+            return None
+        return None
+
     def log_event(self, 
                  user_id: str, 
                  action: str, 
                  resource: str, 
                  details: Optional[Dict[str, Any]] = None,
-                 status: str = "success") -> Dict[str, Any]:
+                 status: str = "success") -> str:
         """
         Log an audit event with complete details.
         
@@ -54,7 +88,7 @@ class ImmutableAuditLogger:
             status: Outcome status of the action
             
         Returns:
-            The complete log entry that was recorded
+            The unique event_id for the recorded log entry
         """
         # Create a unique event ID
         event_id = str(uuid.uuid4())
@@ -78,12 +112,15 @@ class ImmutableAuditLogger:
         # Update the current log file if date has changed
         self.current_log_file = self._get_log_filename()
         
-        # Append the log entry to the file (append-only for immutability)
+        # Append-only: compute hash chain and write
         try:
+            prev_hash = self._get_last_hash()
+            log_entry["prev_hash"] = prev_hash
+            log_entry["hash"] = self._compute_hash(prev_hash, log_entry)
             with open(self.current_log_file, "a") as f:
                 f.write(json.dumps(log_entry) + "\n")
             logger.debug(f"Audit log entry created: {event_id}")
-            return log_entry
+            return event_id
         except Exception as e:
             logger.error(f"Failed to write audit log: {str(e)}")
             raise
@@ -93,7 +130,8 @@ class ImmutableAuditLogger:
                 end_date: Optional[str] = None,
                 user_id: Optional[str] = None,
                 action: Optional[str] = None,
-                limit: int = 100) -> List[Dict[str, Any]]:
+                limit: int = 100,
+                filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Retrieve logs based on filter criteria.
         
@@ -112,6 +150,13 @@ class ImmutableAuditLogger:
         # Determine which log files to search
         log_files = list(self.log_dir.glob("audit_log_*.jsonl"))
         
+        # Merge filters for legacy compatibility
+        if filters:
+            user_id = filters.get("user_id", user_id)
+            action = filters.get("action", action)
+            start_date = filters.get("start_date", start_date)
+            end_date = filters.get("end_date", end_date)
+
         # Filter log files by date range if specified
         if start_date or end_date:
             filtered_files = []
@@ -186,6 +231,44 @@ class ImmutableAuditLogger:
                 logger.error(f"Error processing log file {log_file}: {str(e)}")
         
         return deleted_count
+
+    def apply_retention_policy(self, retention_days: int = 90) -> Dict[str, Any]:
+        """
+        Wrapper to apply retention and return a structured result.
+        """
+        deleted = self.cleanup_old_logs(retention_days)
+        return {"success": True, "logs_deleted": deleted}
+
+    def log_access(self,
+                   actor: str,
+                   action: str,
+                   resource: str,
+                   status: str = "success",
+                   reason: Optional[str] = None,
+                   purpose: Optional[str] = None,
+                   via_endpoint: Optional[str] = None,
+                   ip_address: Optional[str] = None,
+                   user_agent: Optional[str] = None,
+                   extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Convenience helper to standardize access logging fields."""
+        details = {
+            "reason": reason,
+            "purpose": purpose,
+            "via_endpoint": via_endpoint,
+        }
+        if extra:
+            details.update(extra)
+        if ip_address:
+            details["ip_address"] = ip_address
+        if user_agent:
+            details["user_agent"] = user_agent
+        return self.log_event(
+            user_id=actor,
+            action=action,
+            resource=resource,
+            status=status,
+            details=details
+        )
 
 # Global instance for easy import
 audit_logger = ImmutableAuditLogger()

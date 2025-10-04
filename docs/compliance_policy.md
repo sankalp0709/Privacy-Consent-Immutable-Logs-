@@ -57,6 +57,12 @@ The BHIV Core system implements the following data retention policies:
 - **Automatic Cleanup**: The system automatically applies retention policies to remove data that has exceeded its retention period
 - **Retention Exceptions**: Certain data may be retained longer if required by law or legitimate business needs
 
+#### 3.1.1 Implementation Details
+
+- A daily background worker enforces retention for consent records and audit logs
+- The retention window for audit logs is configurable via `AUDIT_LOG_RETENTION_DAYS` (default: `90`)
+- Deletions are themselves logged as audit events, recording actor, reason, and retention window
+
 ### 3.2 Data Minimization
 
 We follow data minimization principles:
@@ -80,10 +86,17 @@ The BHIV Core system maintains tamper-proof audit logs that record:
 
 Audit logs are protected through:
 
-- Append-only storage mechanisms
+- Append-only storage mechanisms (daily JSONL files)
 - Cryptographic verification to detect tampering
 - Access controls limiting who can view audit information
 - Regular integrity checks
+
+#### 4.2.1 Append-Only Design
+
+- Logs are written as JSON Lines (`.jsonl`) with append-only semantics
+- Each entry includes a chained SHA-256 `hash` and `prev_hash` to detect tampering
+- A helper `log_access` standardizes fields: actor, action, resource, status, reason, purpose, endpoint, IP, UA
+- Optional external systems can forward events to `/compliance/ems-forward` for end-to-end coverage
 
 ## 5. User Rights
 
@@ -128,4 +141,5 @@ This policy may be updated periodically. All changes will be documented in the v
 
 ## Version History
 
-- **1.0.0** - Initial policy (Current)
+- **1.1.0** - Retention worker, append-only hash chaining, EMS integration
+- **1.0.0** - Initial policy
