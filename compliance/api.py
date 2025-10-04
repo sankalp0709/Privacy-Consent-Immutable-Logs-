@@ -3,13 +3,14 @@ Compliance API Endpoints for BHIV Core
 Provides REST API for consent management and audit log access
 """
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Query
+import os
 from fastapi.responses import JSONResponse
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pydantic import BaseModel
 
-from compliance.consent_manager import consent_manager
-from compliance.audit_logger import audit_logger
+from compliance.consent_manager import ConsentManager, consent_manager
+from compliance.audit_logger import ImmutableAuditLogger, audit_logger
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -36,6 +37,17 @@ class AuditLogRequest(BaseModel):
     user_id: Optional[str] = None
     action: Optional[str] = None
     limit: int = 100
+
+class EMSForwardRequest(BaseModel):
+    actor: str
+    action: str
+    resource: str
+    status: str = "success"
+    reason: Optional[str] = None
+    purpose: Optional[str] = None
+    ems_trace_id: Optional[str] = None
+    ems_source: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
 
 # Create router
 router = APIRouter(
@@ -233,29 +245,74 @@ async def apply_retention_policy(
         
         # Apply retention policies
         consent_deleted = consent_manager.apply_retention_policy()
-        logs_deleted = audit_logger.cleanup_old_logs()
+        retention_days = int(os.getenv("AUDIT_LOG_RETENTION_DAYS", "90"))
+        logs_result = audit_logger.apply_retention_policy(retention_days=retention_days)
+        logs_deleted = logs_result.get("logs_deleted", 0)
         
         # Log retention policy application
-        audit_logger.log_event(
-            user_id=requester_id,
+        audit_logger.log_access(
+            actor=requester_id,
             action="apply_retention_policy",
             resource="system",
-            details={
-                "ip_address": client_ip,
-                "user_agent": request.headers.get("User-Agent", "unknown"),
+            status="success",
+            reason="scheduled_or_manual",
+            purpose="retention_enforcement",
+            via_endpoint="/compliance/apply-retention",
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent", "unknown"),
+            extra={
                 "consent_records_deleted": consent_deleted,
-                "log_files_deleted": logs_deleted
+                "log_files_deleted": logs_deleted,
+                "retention_days": retention_days
             }
         )
         
         return {
             "status": "success",
             "consent_records_deleted": consent_deleted,
-            "log_files_deleted": logs_deleted
+            "log_files_deleted": logs_deleted,
+            "retention_days": retention_days
         }
     except Exception as e:
         logger.error(f"Error applying retention policy: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to apply retention policy: {str(e)}")
+
+# EMS forward endpoint
+@router.post("/ems-forward")
+async def ems_forward(
+    request: Request,
+    payload: EMSForwardRequest,
+    api_key: str = Depends(verify_api_key)
+):
+    """
+    Ingest EMS events into immutable audit logs for end-to-end compliance.
+    """
+    try:
+        actor = payload.actor
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("User-Agent", "unknown")
+
+        audit_logger.log_access(
+            actor=actor,
+            action=payload.action,
+            resource=payload.resource,
+            status=payload.status,
+            reason=payload.reason,
+            purpose=payload.purpose,
+            via_endpoint="/compliance/ems-forward",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            extra={
+                "ems_trace_id": payload.ems_trace_id,
+                "ems_source": payload.ems_source,
+                "details": payload.details or {}
+            }
+        )
+
+        return {"status": "ok", "ingested": True}
+    except Exception as e:
+        logger.error(f"EMS forward error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to ingest EMS event: {str(e)}")
 
 # Health check endpoint
 @router.get("/health")
